@@ -7,9 +7,23 @@ const commands = [
     {
         name: 'create-ticket',
         description: 'Create a ticket for further evaluation',
+        options: [
+            {
+                name: 'issue-type',
+                description: 'What type of issue is this server, member, or program',
+                type: 3,
+                required: true,
+            },
+            {
+                name: 'issue',
+                description: 'What is the issue?',
+                type: 3,
+                required: true,
+            }
+        ]
     },
     {
-        name: 'telete-ticket',
+        name: 'delete-ticket',
         description: 'Delete Current ticket',
     },
     {
@@ -30,7 +44,7 @@ try {
     await rest.put(Routes.applicationCommands(CLIENT), {body: commands});
     console.log('Successfully sent commands!');
 } catch (error) {
-    console.log('There seems to be an error somewhere along the way');
+    console.log(error);
 }
 
 const client = new Client ({ intents: [GatewayIntentBits.Guilds] }); 
@@ -39,11 +53,26 @@ client.on(Events.ClientReady, readyClient => {
     console.log('Bot is online!');
 })
 
+const serverTickets = new Map();
+
 client.on(Events.InteractionCreate, async interaction => {
     if (!interaction.isChatInputCommand()) return;
 
     if (interaction.commandName == 'create-ticket') {
-        await interaction.reply('Okay');
+
+        const ticket = new Ticket(
+            interaction.options.getString('issue'),
+            interaction.options.getString('issue-type'),
+            new Date().toDateString(),
+            interaction.user.username
+        );
+        
+        if (!serverTickets.has(interaction.guildId)){
+            serverTickets.set(interaction.guildId, new TicketQueue());
+        }
+        serverTickets.get(interaction.guildId).addTicket(ticket);
+
+        await interaction.reply("Ticket Successfully Created!");
     }
     if (interaction.commandName == 'delete-ticket') {
         await interaction.reply('Okay');
@@ -55,7 +84,6 @@ client.on(Events.InteractionCreate, async interaction => {
         await interaction.reply('Okay');
     }
 })
-
 
 client.login(TOKEN);
 
