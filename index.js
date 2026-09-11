@@ -56,9 +56,7 @@ client.on(Events.InteractionCreate, async interaction => {
     }
 })
 
-class ticket {
-    
-}
+
 client.login(TOKEN);
 
 
