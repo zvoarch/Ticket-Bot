@@ -9,7 +9,7 @@ const commands = [
         description: 'Create a ticket for further evaluation',
     },
     {
-        name: 'telete-ticket',
+        name: 'delete-ticket',
         description: 'Delete Current ticket',
     },
     {
@@ -56,9 +56,51 @@ client.on(Events.InteractionCreate, async interaction => {
     }
 })
 
-class ticket {
-    
+class Ticket {
+
+    static nextID = 1;
+    constructor(issue, issue_type, date, user ){
+        this.id = Ticket.nextID++;
+        this.issue = issue;
+        this.issue_type = issue_type;
+        this.date = date;
+        this.user = user
+    }
 }
+
+class TicketQueue {
+    constructor(){
+        this.ticketList = [];
+        this.solvedTickets = [];
+    }
+
+    createTicket(issue, issue_type, date, user){
+        this.ticketList.push(new Ticket(issue,issue_type,date,user))
+    }
+    deleteTicket(id){
+        const index = this.ticketList.findIndex(ticket => ticket.id === id);
+
+        if (id == -1) return false;
+
+        this.ticketList.splice(index, 1);
+        return true;
+    }
+
+    getAvailableTickets(){
+        return this.ticketList.slice(0,10);
+    }
+
+    closeTicket(id){
+        const index = this.ticketList.findIndex(ticket => ticket.id === id);
+        const deletedTicket = this.ticketList.splice(index, 1);
+
+        solvedTickets.unshift(deletedTicket);
+    }
+    getTicketHistory(){
+        return this.solvedTickets.splice(0,10);
+    }
+}
+
 client.login(TOKEN);
 
 
